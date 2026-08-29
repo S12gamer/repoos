@@ -1,0 +1,21 @@
+{
+"title": "Universo de Videojuegos",
+"description": "Pon a prueba tus conocimientos sobre consolas, personajes y títulos icónicos.",
+"iconName": "bolt",
+"colorHex": "#8B5CF6",
+"roundDurationSeconds": 120,
+"questions": [
+{ "word": "Mario", "hint": "Fontanero italiano que rescata a la Princesa Peach" },
+{ "word": "Minecraft", "hint": "Juego de bloques y supervivencia más vendido de la historia" },
+{ "word": "Kratos", "hint": "El fantasma de Esparta y dios de la guerra" },
+{ "word": "Zelda", "hint": "Princesa de Hyrule que da nombre a una gran saga" },
+{ "word": "Pikachu", "hint": "Ratón eléctrico y mascota principal de Pokémon" },
+{ "word": "Master Chief", "hint": "Protagonista del casco verde en la saga Halo" },
+{ "word": "Fortnite", "hint": "Battle royale donde construyes y haces bailes populares" },
+{ "word": "GTA V", "hint": "Juego en Los Santos protagonizado por Michael, Trevor y Franklin" },
+{ "word": "Elden Ring", "hint": "Aclamado juego de acción y rol creado por FromSoftware" },
+{ "word": "Tetris", "hint": "Clásico juego soviético de encajar piezas geométricas" },
+{ "word": "Pac-Man", "hint": "Esfera amarilla que come fantasmas en un laberinto" },
+{ "word": "Sonic", "hint": "Erizo azul ultra veloz que junta anillos de oro" }
+]
+}

@@ -1,0 +1,21 @@
+{
+"title": "Cine y Películas",
+"description": "Demuestra cuánto sabes sobre grandes éxitos y clásicos de la pantalla grande.",
+"iconName": "bolt",
+"colorHex": "#EF4444",
+"roundDurationSeconds": 60,
+"questions": [
+{ "word": "Titanic", "hint": "Romance trágico a bordo del famoso transatlántico" },
+{ "word": "Star Wars", "hint": "Saga espacial que involucra la Fuerza y los sables de luz" },
+{ "word": "Darth Vader", "hint": "Villano de casco negro y padre de Luke Skywalker" },
+{ "word": "Harry Potter", "hint": "Joven mago con una cicatriz en forma de rayo" },
+{ "word": "Jurassic Park", "hint": "Parque temático con dinosaurios clonados que sale mal" },
+{ "word": "Avatar", "hint": "Película en el planeta Pandora con seres de piel azul" },
+{ "word": "Shrek", "hint": "Ogro verde que vive en un pantano junto a un burro parlante" },
+{ "word": "Oppenheimer", "hint": "Drama histórico sobre la creación de la bomba atómica" },
+{ "word": "Barbie", "hint": "Película en live-action sobre la muñeca más famosa de Mattel" },
+{ "word": "El Señor de los Anillos", "hint": "Viaje a la Tierra Media para destruir el Anillo Único" },
+{ "word": "Inception", "hint": "Thriller sobre ladrones que se infiltran en los sueños" },
+{ "word": "Woody", "hint": "Vaquero de juguete y líder en la franquicia Toy Story" }
+]
+}
