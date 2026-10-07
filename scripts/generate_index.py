@@ -33,21 +33,41 @@ def iso_to_ms(iso: str) -> int:
 
 
 def badging(apk: Path) -> dict:
-    out = subprocess.check_output(["aapt2", "dump", "badging", str(apk)], text=True)
+    proc = subprocess.run(
+        ["aapt2", "dump", "badging", str(apk)], capture_output=True, text=True
+    )
+    out = proc.stdout
+    if proc.returncode != 0 or "package:" not in out:
+        print(proc.stdout[:2000])
+        print(proc.stderr[:2000])
+        sys.exit(f"[ERROR] aapt2 no pudo leer {apk.name} (código {proc.returncode})")
 
     def need(pattern: str) -> str:
         m = re.search(pattern, out)
         if not m:
+            print("----- salida de aapt2 (primeras líneas) -----")
+            print("\n".join(out.splitlines()[:25]))
             sys.exit(f"[ERROR] No se encontró {pattern!r} en badging de {apk.name}")
         return m.group(1)
 
+    def optional_int(pattern: str, default: int) -> int:
+        m = re.search(pattern, out)
+        return int(m.group(1)) if m else default
+
+    # (?<![A-Za-z]) evita que "sdkVersion" case dentro de "targetSdkVersion"
+    min_sdk = optional_int(r"(?<![A-Za-z])(?:minSdkVersion|sdkVersion):'(\d+)'", 1)
+    target_sdk = optional_int(r"targetSdkVersion:'(\d+)'", min_sdk)
+    if not re.search(r"(?<![A-Za-z])(?:minSdkVersion|sdkVersion):'", out):
+        print(f"[WARN] {apk.name}: aapt2 no reporta minSdk, se usa 1")
+
+    vname = re.search(r"versionName='([^']*)'", out)
     native = re.search(r"^native-code: (.*)$", out, re.M)
     return {
         "packageName": need(r"package: name='([^']+)'"),
         "versionCode": int(need(r"versionCode='(\d+)'")),
-        "versionName": need(r"versionName='([^']*)'"),
-        "minSdk": int(need(r"sdkVersion:'(\d+)'")),
-        "targetSdk": int((re.search(r"targetSdkVersion:'(\d+)'", out) or [0, 0])[1]),
+        "versionName": vname.group(1) if vname else str(need(r"versionCode='(\d+)'")),
+        "minSdk": min_sdk,
+        "targetSdk": target_sdk,
         "abis": re.findall(r"'([\w-]+)'", native.group(1)) if native else [],
         "perms": sorted(set(re.findall(r"uses-permission: name='([^']+)'", out))),
     }
