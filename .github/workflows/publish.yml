@@ -35,21 +35,21 @@ jobs:
           echo "Usando $BT"
           echo "$BT" >> "$GITHUB_PATH"
 
-      - name: Generar índice
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO_BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
-          REPO_NAME: Mi Tienda
-        run: python scripts/generate_index.py
-
       - name: Firmar índice
         env:
           KEY: ${{ secrets.REPO_SIGNING_KEY }}
         run: |
-          echo "$KEY" > /tmp/key.pem
+          if [ -z "$KEY" ]; then
+            echo "::error::El secret REPO_SIGNING_KEY no existe o está vacío (debe ser un Repository secret)"
+            exit 1
+          fi
+          printf '%s\n' "$KEY" > /tmp/key.pem
+          if ! head -n1 /tmp/key.pem | grep -q "BEGIN EC PRIVATE KEY\|BEGIN PRIVATE KEY"; then
+            echo "::error::El secret no parece una clave privada PEM (falta la línea -----BEGIN ...-----)"
+            exit 1
+          fi
           openssl dgst -sha256 -sign /tmp/key.pem -out /tmp/sig.bin repo/index-v1.json
           base64 -w0 /tmp/sig.bin > repo/index-v1.json.sig
-          # Autoverificación con la pública derivada de la privada
           openssl ec -in /tmp/key.pem -pubout -out /tmp/pub.pem
           openssl dgst -sha256 -verify /tmp/pub.pem -signature /tmp/sig.bin repo/index-v1.json
           rm -f /tmp/key.pem /tmp/pub.pem /tmp/sig.bin
