@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
     paths: ["metadata/**", "scripts/**", ".github/workflows/publish.yml"]
-  workflow_dispatch:            # botón manual "Run workflow"
+  workflow_dispatch:
   repository_dispatch:
-    types: [app-released]       # lo dispara el repo de la app al publicar un release
+    types: [app-released]
 
 permissions:
   contents: read
@@ -35,6 +35,20 @@ jobs:
           echo "Usando $BT"
           echo "$BT" >> "$GITHUB_PATH"
 
+      - name: Generar índice
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          REPO_NAME: Mi Tienda
+        run: python scripts/generate_index.py
+
+      - name: Comprobar que se generó el índice
+        run: |
+          pwd
+          ls -la repo || true
+          test -s repo/index-v1.json || { echo "::error::repo/index-v1.json no existe; revisa el log de 'Generar índice'"; exit 1; }
+          head -c 600 repo/index-v1.json; echo
+
       - name: Firmar índice
         env:
           KEY: ${{ secrets.REPO_SIGNING_KEY }}
@@ -58,7 +72,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: repo          # solo se publica esta carpeta
+          path: repo
 
   deploy:
     needs: build
