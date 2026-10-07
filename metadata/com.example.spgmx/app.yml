@@ -1,0 +1,12 @@
+source: S12gamer/repoos          # repo donde están los Releases
+asset_pattern: '\.apk$'           # regex del asset a usar (si el release tiene varios)
+include_prereleases: false
+name: SpeedGarage
+summary: Taller automotriz especializado
+description: |
+  Taller automotriz especializado en impulsar la aficion principiante en este mundo del automovilismo.
+categories:
+  - Productividad
+license: Apache-2.0
+webSite: https://tuorg.com
+sourceCode: https://github.com/S12gamer/repoos
