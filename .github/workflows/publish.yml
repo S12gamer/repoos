@@ -1,0 +1,71 @@
+name: Publicar tienda
+
+on:
+  push:
+    branches: [main]
+    paths: ["metadata/**", "scripts/**", ".github/workflows/publish.yml"]
+  workflow_dispatch:            # botón manual "Run workflow"
+  repository_dispatch:
+    types: [app-released]       # lo dispara el repo de la app al publicar un release
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install pyyaml requests
+
+      - name: Añadir Android build-tools (aapt2, apksigner) al PATH
+        run: |
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          echo "Usando $BT"
+          echo "$BT" >> "$GITHUB_PATH"
+
+      - name: Generar índice
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          REPO_NAME: Mi Tienda
+        run: python scripts/generate_index.py
+
+      - name: Firmar índice
+        env:
+          KEY: ${{ secrets.REPO_SIGNING_KEY }}
+        run: |
+          echo "$KEY" > /tmp/key.pem
+          openssl dgst -sha256 -sign /tmp/key.pem -out /tmp/sig.bin repo/index-v1.json
+          base64 -w0 /tmp/sig.bin > repo/index-v1.json.sig
+          # Autoverificación con la pública derivada de la privada
+          openssl ec -in /tmp/key.pem -pubout -out /tmp/pub.pem
+          openssl dgst -sha256 -verify /tmp/pub.pem -signature /tmp/sig.bin repo/index-v1.json
+          rm -f /tmp/key.pem /tmp/pub.pem /tmp/sig.bin
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: repo          # solo se publica esta carpeta
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
