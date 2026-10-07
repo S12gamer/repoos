@@ -89,7 +89,11 @@ def main():
 
     for app_dir in sorted(p for p in META.iterdir() if p.is_dir()):
         pkg = app_dir.name
-        cfg = yaml.safe_load((app_dir / "app.yml").read_text(encoding="utf-8"))
+        yml = app_dir / "app.yml"
+        cfg = yaml.safe_load(yml.read_text(encoding="utf-8")) if yml.exists() else None
+        if not cfg or "source" not in cfg:
+            print(f"[WARN] {pkg}: app.yml vacío o sin 'source', se omite")
+            continue
         pattern = re.compile(cfg.get("asset_pattern", r"\.apk$"))
         releases = fetch_releases(cfg["source"], cfg.get("include_prereleases", False))
         if not releases:
